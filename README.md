@@ -2,8 +2,6 @@
 
 # TODO:
 
-Add basic pygame display
-
 Add basic square objects
 
 Make square objects move around, bouncing off walls
@@ -29,6 +27,8 @@ Improve stability, fix any edge cases
 Improve performance if possible
 
 # Done:
+
+Add basic pygame display
 
 ## Potential:
 
