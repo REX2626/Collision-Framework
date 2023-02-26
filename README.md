@@ -2,8 +2,6 @@
 
 # TODO:
 
-Make positions and velocities be fractions instead of floats (built in fractions or self made)
-
 Make time move forward until there is a collision, then do the collision
 To do the collision: swap the velocities of the objects
 
@@ -29,6 +27,8 @@ Add basic pygame display
 Add basic square objects
 
 Make square objects move around, bouncing off walls
+
+Make positions and velocities be fractions instead of floats (built in fractions or self made)
 
 ## Potential:
 

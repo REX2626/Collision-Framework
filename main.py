@@ -4,14 +4,15 @@ from time import perf_counter
 from objects import Square
 import game
 import pygame
-from pygame.math import Vector2
+from fractions import Fraction
+from vector import Vector
 
 pygame.init()
 
 def spawn_squares(n):
     for _ in range(n):
-        position = Vector2(random.randint(100, game.WIDTH-100), random.randint(100, game.HEIGHT-100))
-        velocity = Vector2(random.randint(-100, 100), random.randint(-100, 100))
+        position = Vector(random.randint(100, game.WIDTH-100), random.randint(100, game.HEIGHT-100))
+        velocity = Vector(random.randint(-100, 100), random.randint(-100, 100))
         game.objects.add(Square(position, velocity, size=50))
 
 def move_objects(delta_time):
@@ -51,4 +52,4 @@ while True:
     draw_window()
 
     time2 = perf_counter()
-    delta_time = time2 - time1
+    delta_time = Fraction(time2 - time1)
