@@ -1,11 +1,12 @@
 import math
+from fractions import Fraction
 
 
 
 class Vector():
     def __init__(self, x, y) -> None:
-        self.x = x
-        self.y = y
+        self.x = Fraction(x)
+        self.y = Fraction(y)
 
     def __add__(self, arg):
 
@@ -64,6 +65,12 @@ class Vector():
 
     def __mod__(self, arg):
         return Vector(int(self.x) % arg, int(self.y) % arg)
+    
+    def __eq__(self, arg):
+        if type(arg) == Vector:
+            return self.x == arg.x and self.y == arg.y
+        else:
+            return self.magnitude() == arg
     
     def __iter__(self):
         return iter((self.x, self.y))

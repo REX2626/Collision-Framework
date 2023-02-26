@@ -7,6 +7,7 @@ class Square():
         self.position = position
         self.velocity = velocity
         self.size = size
+        self.colour = (255, 0, 0)
 
     def draw(self):
-        pygame.draw.rect(game.WIN, (255, 0, 0), (float(self.position.x), float(self.position.y), self.size, self.size))
+        pygame.draw.rect(game.WIN, self.colour, (float(self.position.x), float(self.position.y), self.size, self.size))
