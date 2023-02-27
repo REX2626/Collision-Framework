@@ -2,7 +2,7 @@
 
 # TODO:
 
-Add multiple collision at once
+Add multile collisions touching at the same time
 
 Add rotation
 Check for collision by using pixel masks?
@@ -29,6 +29,8 @@ Make time move forward until there is a collision, then do the collision
 To do the collision: swap the velocities of the objects
 
 Add multiple collisions per frame
+
+Add multiple collision at same the time
 
 ## Potential:
 

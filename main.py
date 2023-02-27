@@ -8,6 +8,8 @@ import pygame
 from fractions import Fraction
 from vector import Vector
 
+from tests import multiple_at_once, multiple_joined
+
 pygame.init()
 
 def spawn_squares(n):
@@ -36,8 +38,8 @@ def overlap_y(object1: Square, object2: Square, time: Fraction):
 
 def get_coll_objs():
     shortest_time = math.inf
-    coll_objs_x = None
-    coll_objs_y = None
+    coll_objs_x = []
+    coll_objs_y = []
     for object1 in game.objects:
         for object2 in game.objects:
             if object1 == object2:
@@ -50,19 +52,27 @@ def get_coll_objs():
             
             # x
             if rel_vel.x and dist_x / rel_vel.x > 0:
-
-                if dist_x / rel_vel.x < shortest_time and overlap_y(object1, object2, dist_x / rel_vel.x):
-                    shortest_time = dist_x / rel_vel.x 
-                    coll_objs_x = object1, object2
-                    coll_objs_y = None
+                
+                if overlap_y(object1, object2, dist_x / rel_vel.x):
+                    if dist_x / rel_vel.x < shortest_time:
+                        shortest_time = dist_x / rel_vel.x 
+                        coll_objs_x = [(object1, object2)]
+                        coll_objs_y = []
+                    
+                    elif dist_x / rel_vel.x == shortest_time:
+                        coll_objs_x.append((object1, object2))
 
             # y
             if rel_vel.y and dist_y / rel_vel.y > 0:
+                
+                if overlap_x(object1, object2, dist_y / rel_vel.y):
+                    if dist_y / rel_vel.y < shortest_time:
+                        shortest_time = dist_y / rel_vel.y
+                        coll_objs_y = [(object1, object2)]
+                        coll_objs_x = []
 
-                if dist_y / rel_vel.y < shortest_time and overlap_x(object1, object2, dist_y / rel_vel.y):
-                    shortest_time = dist_y / rel_vel.y
-                    coll_objs_y = object1, object2
-                    coll_objs_x = None
+                    elif dist_y / rel_vel.y == shortest_time:
+                        coll_objs_y.append((object1, object2))
 
     return shortest_time, coll_objs_x, coll_objs_y
 
@@ -93,8 +103,8 @@ def update_objects(delta_time):
             #if coll_objs_x: print("positions:", coll_objs_x[0].position, coll_objs_x[1].position)
             #if coll_objs_y: print("positions:", coll_objs_y[0].position, coll_objs_y[1].position)
             delta_time -= shortest_time
-            if coll_objs_x: collide_objs_x(coll_objs_x) 
-            if coll_objs_y: collide_objs_y(coll_objs_y)
+            [collide_objs_x(pair) for pair in coll_objs_x]
+            [collide_objs_y(pair) for pair in coll_objs_y]
             """draw_objects()
             draw_window()
             x = True
@@ -135,7 +145,9 @@ def draw_window():
     pygame.display.update()
     game.WIN.fill((0, 0, 0))
 
-spawn_squares(5)
+spawn_squares(12) 
+#multiple_at_once()
+#multiple_joined()
 
 delta_time = 1
 while True:
