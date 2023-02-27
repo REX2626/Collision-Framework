@@ -8,7 +8,7 @@ import pygame
 from fractions import Fraction
 from vector import Vector
 
-from tests import multiple_at_once, multiple_joined
+from tests import multiple_at_once, three_joined, four_joined, five_joined, eleven_joined
 
 pygame.init()
 
@@ -36,6 +36,22 @@ def overlap_y(object1: Square, object2: Square, time: Fraction):
     pos2 = object2.position.y + object2.velocity.y * time
     return not(pos1 > pos2 + object2.size or pos2 > pos1 + object1.size) # Check if not overlapping, then invert that
 
+def add_to_group(list: list[set], object1, object2):
+    """If there is already a group with one of the objects in, add the objects to it"""
+    group = None
+    for _group in list:
+        if object1 in _group or object2 in _group:
+            if group is None:
+                _group.add(object1)
+                _group.add(object2)
+                group = _group
+            else:
+                group.update(_group)
+                list.remove(_group)
+
+    if group is None: # If no group found: add a new group
+        list.append({object1, object2})
+
 def get_coll_objs():
     shortest_time = math.inf
     coll_objs_x = []
@@ -56,11 +72,11 @@ def get_coll_objs():
                 if overlap_y(object1, object2, dist_x / rel_vel.x):
                     if dist_x / rel_vel.x < shortest_time:
                         shortest_time = dist_x / rel_vel.x 
-                        coll_objs_x = [(object1, object2)]
+                        coll_objs_x = [{object1, object2}]
                         coll_objs_y = []
                     
                     elif dist_x / rel_vel.x == shortest_time:
-                        coll_objs_x.append((object1, object2))
+                        add_to_group(coll_objs_x, object1, object2)
 
             # y
             if rel_vel.y and dist_y / rel_vel.y > 0:
@@ -68,26 +84,40 @@ def get_coll_objs():
                 if overlap_x(object1, object2, dist_y / rel_vel.y):
                     if dist_y / rel_vel.y < shortest_time:
                         shortest_time = dist_y / rel_vel.y
-                        coll_objs_y = [(object1, object2)]
+                        coll_objs_y = [{object1, object2}]
                         coll_objs_x = []
 
                     elif dist_y / rel_vel.y == shortest_time:
-                        coll_objs_y.append((object1, object2))
+                        add_to_group(coll_objs_y, object1, object2)
 
     return shortest_time, coll_objs_x, coll_objs_y
 
-def collide_objs_x(coll_objs: tuple[Square, Square]):
-    object1, object2 = coll_objs
-    object1.colour = (0, 255, 0)
-    object2.colour = (0, 255, 0)
-    object1.velocity.x, object2.velocity.x = object2.velocity.x, object1.velocity.x
+def collide_objs_x(coll_objs: set[Square]):
+    """Swap the velocities of the sorted objects, with the reverse sorted objects"""
+    sorted_group: list[Square] = sorted(coll_objs, key=lambda object: object.position.x)
+    velocities = []
+
+    for object in sorted_group:
+        object.colour = (0, 255, 0) # Make object green
+        velocities.append(object.velocity.x)
+
+    for object, velocity in zip(sorted_group, reversed(velocities)):
+        object.velocity.x = velocity
+
     #print("x")
 
-def collide_objs_y(coll_objs: tuple[Square, Square]):
-    object1, object2 = coll_objs
-    object1.colour = (0, 255, 0)
-    object2.colour = (0, 255, 0)
-    object1.velocity.y, object2.velocity.y = object2.velocity.y, object1.velocity.y
+def collide_objs_y(coll_objs: set[Square]):
+    """Swap the velocities of the sorted objects, with the reverse sorted objects"""
+    sorted_group: list[Square] = sorted(coll_objs, key=lambda object: object.position.y)
+    velocities = []
+
+    for object in sorted_group:
+        object.colour = (0, 255, 0) # Make object green
+        velocities.append(object.velocity.y)
+
+    for object, velocity in zip(sorted_group, reversed(velocities)):
+        object.velocity.y = velocity
+    
     #print("y")
 
 def update_objects(delta_time):
@@ -95,16 +125,14 @@ def update_objects(delta_time):
         object.colour = (255, 0, 0)
 
     while True:
-        shortest_time, coll_objs_x, coll_objs_y= get_coll_objs()
+        shortest_time, coll_objs_x, coll_objs_y = get_coll_objs()
 
-        #print(float(delta_time))
         if shortest_time < delta_time:
+            
             move_objects(shortest_time)
-            #if coll_objs_x: print("positions:", coll_objs_x[0].position, coll_objs_x[1].position)
-            #if coll_objs_y: print("positions:", coll_objs_y[0].position, coll_objs_y[1].position)
             delta_time -= shortest_time
-            [collide_objs_x(pair) for pair in coll_objs_x]
-            [collide_objs_y(pair) for pair in coll_objs_y]
+            [collide_objs_x(group) for group in coll_objs_x]
+            [collide_objs_y(group) for group in coll_objs_y]
             """draw_objects()
             draw_window()
             x = True
@@ -145,11 +173,14 @@ def draw_window():
     pygame.display.update()
     game.WIN.fill((0, 0, 0))
 
-spawn_squares(12) 
+#spawn_squares(12)
 #multiple_at_once()
-#multiple_joined()
+#three_joined()
+#four_joined()
+#five_joined()
+eleven_joined()
 
-delta_time = 1
+delta_time = 0
 while True:
     time1 = perf_counter()
 

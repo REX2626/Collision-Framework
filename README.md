@@ -2,8 +2,6 @@
 
 # TODO:
 
-Add multile collisions touching at the same time
-
 Add rotation
 Check for collision by using pixel masks?
 Find a way to work out when they will collide
@@ -31,6 +29,8 @@ To do the collision: swap the velocities of the objects
 Add multiple collisions per frame
 
 Add multiple collision at same the time
+
+Add multile collisions touching at the same time
 
 ## Potential:
 
