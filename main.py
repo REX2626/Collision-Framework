@@ -2,7 +2,7 @@ import sys
 import math
 import random
 from time import perf_counter
-from objects import Square
+from objects import Square, Immovable
 import game
 import pygame
 from fractions import Fraction
@@ -25,6 +25,12 @@ def spawn_squares(n):
                     break
         print(i)
         game.objects.add(Square(position, velocity, size=50))
+
+def spawn_walls():
+    game.objects.add(Immovable(Vector(0, -game.WIDTH), Vector(0, 0), game.WIDTH)) # top
+    game.objects.add(Immovable(Vector(0, game.HEIGHT), Vector(0, 0), game.WIDTH)) # bottom
+    game.objects.add(Immovable(Vector(-game.HEIGHT, 0), Vector(0, 0), game.HEIGHT)) # left
+    game.objects.add(Immovable(Vector(game.WIDTH, 0), Vector(0, 0), game.HEIGHT)) # right
 
 def overlap_x(object1: Square, object2: Square, time: Fraction):
     pos1 = object1.position.x + object1.velocity.x * time
@@ -96,6 +102,17 @@ def collide_objs_x(coll_objs: set[Square]):
     """Swap the velocities of the sorted objects, with the reverse sorted objects"""
     sorted_group: list[Square] = sorted(coll_objs, key=lambda object: object.position.x)
     velocities = []
+    
+    # Immovable objects
+    if isinstance(sorted_group[0], Immovable):
+        del sorted_group[0]
+        for object in sorted_group:
+            object.velocity.x *= -1
+
+    if isinstance(sorted_group[-1], Immovable):
+        del sorted_group[-1]
+        for object in sorted_group:
+            object.velocity.x *= -1 
 
     for object in sorted_group:
         object.colour = (0, 255, 0) # Make object green
@@ -111,6 +128,17 @@ def collide_objs_y(coll_objs: set[Square]):
     sorted_group: list[Square] = sorted(coll_objs, key=lambda object: object.position.y)
     velocities = []
 
+    # Immovable objects
+    if isinstance(sorted_group[0], Immovable):
+        del sorted_group[0]
+        for object in sorted_group:
+            object.velocity.y *= -1
+
+    if isinstance(sorted_group[-1], Immovable):
+        del sorted_group[-1]
+        for object in sorted_group:
+            object.velocity.y *= -1 
+
     for object in sorted_group:
         object.colour = (0, 255, 0) # Make object green
         velocities.append(object.velocity.y)
@@ -122,7 +150,7 @@ def collide_objs_y(coll_objs: set[Square]):
 
 def update_objects(delta_time):
     for object in game.objects:
-        object.colour = (255, 0, 0)
+        object.colour = (0, 0, 255) if isinstance(object, Immovable) else (255, 0, 0)
 
     while True:
         shortest_time, coll_objs_x, coll_objs_y = get_coll_objs()
@@ -153,18 +181,6 @@ def move_objects(delta_time):
     for object in game.objects:
         object.position += object.velocity * delta_time
 
-        # Check if object has hit the left of right wall
-        if object.position.x < 0 or object.position.x > game.WIDTH - object.size:
-            object.velocity.x *= -1
-            if object.position.x < 0: object.position.x = 0
-            else: object.position.x = game.WIDTH - object.size
-
-        # Check if object has hit the top or bottom wall
-        if object.position.y < 0 or object.position.y > game.HEIGHT - object.size:
-            object.velocity.y *= -1
-            if object.position.y < 0: object.position.y = 0
-            else: object.position.y = game.HEIGHT - object.size
-
 def draw_objects():
     for object in game.objects:
         object.draw()
@@ -173,12 +189,13 @@ def draw_window():
     pygame.display.update()
     game.WIN.fill((0, 0, 0))
 
-#spawn_squares(12)
+spawn_walls()
+spawn_squares(10)
 #multiple_at_once()
 #three_joined()
 #four_joined()
 #five_joined()
-eleven_joined()
+#eleven_joined()
 
 delta_time = 0
 while True:

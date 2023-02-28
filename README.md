@@ -32,6 +32,8 @@ Add multiple collision at same the time
 
 Add multile collisions touching at the same time
 
+Add Immovable objects
+
 ## Potential:
 
 Make a soft body square, 4 corners are the points

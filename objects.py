@@ -11,3 +11,10 @@ class Square():
 
     def draw(self):
         pygame.draw.rect(game.WIN, self.colour, (float(self.position.x), float(self.position.y), self.size, self.size))
+
+
+
+class Immovable(Square):
+    def __init__(self, position: Vector, velocity: Vector, size: int) -> None:
+        super().__init__(position, velocity, size)
+        self.colour = (0, 0, 255)
