@@ -196,6 +196,7 @@ spawn_squares(10)
 #four_joined()
 #five_joined()
 #eleven_joined()
+game.objects.add(Immovable(Vector(550, 300), Vector(0, 0), 100))
 
 delta_time = 0
 while True:

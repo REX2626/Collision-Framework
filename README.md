@@ -2,9 +2,9 @@
 
 # TODO:
 
-Add rotation
-Check for collision by using pixel masks?
-Find a way to work out when they will collide
+Add collisions for rotated objects (make rotation relative, and use corners of square)
+
+Add rotation speed into collision system
 
 Collisions will make moments, which will rotate a square
 The moment will occur wherever the square touches the other square
@@ -33,6 +33,8 @@ Add multiple collision at same the time
 Add multile collisions touching at the same time
 
 Add Immovable objects
+
+Add rotation
 
 ## Potential:
 
