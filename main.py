@@ -58,6 +58,45 @@ def add_to_group(list: list[set], object1, object2):
     if group is None: # If no group found: add a new group
         list.append({object1, object2})
 
+def corners_interesect(object1: Square, object2: Square):
+    """
+    Rotates obj1 and obj2 so that object2 has a rotation of 0
+
+    Then check if any of the 4 corners of obj1 intersect obj2
+    """
+    # Rotate obj1 and obj2
+    original_obj1_rotation = object1.rotation
+    original_obj2_rotation = object2.rotation
+
+    object1.rotation -= object2.rotation
+    object2.rotation -= object2.rotation
+
+    intersecting = False
+
+    x, y, width, height = object2.position.x, object2.position.y, object2.size, object2.size
+
+    # Top left corner
+    if object1.tl().inside(x, y, width, height):
+        intersecting = True
+
+    # Top right corner
+    elif object1.tr().inside(x, y, width, height):
+        intersecting = True
+
+    # Bottom left corner
+    elif object1.bl().inside(x, y, width, height):
+        intersecting = True
+
+    # Bottom right corner
+    elif object1.br().inside(x, y, width, height):
+        intersecting = True
+
+    # Correct rotation of obj1 and obj2
+    object1.rotation = original_obj1_rotation
+    object2.rotation = original_obj2_rotation
+
+    return intersecting
+
 def get_coll_objs():
     shortest_time = math.inf
     coll_objs_x = []
@@ -66,27 +105,27 @@ def get_coll_objs():
         for object2 in game.objects:
             if object1 == object2:
                 continue
-            
+
             rel_vel = object1.velocity - object2.velocity
 
             dist_x = object2.position.x - object1.position.x - object1.size if object1.position.x < object2.position.x else object2.position.x - object2.size - object1.position.x
             dist_y = object2.position.y - object1.position.y - object1.size if object1.position.y < object2.position.y else object2.position.y - object2.size - object1.position.y
-            
+
             # x
             if rel_vel.x and dist_x / rel_vel.x > 0:
-                
+
                 if overlap_y(object1, object2, dist_x / rel_vel.x):
                     if dist_x / rel_vel.x < shortest_time:
-                        shortest_time = dist_x / rel_vel.x 
+                        shortest_time = dist_x / rel_vel.x
                         coll_objs_x = [{object1, object2}]
                         coll_objs_y = []
-                    
+
                     elif dist_x / rel_vel.x == shortest_time:
                         add_to_group(coll_objs_x, object1, object2)
 
             # y
             if rel_vel.y and dist_y / rel_vel.y > 0:
-                
+
                 if overlap_x(object1, object2, dist_y / rel_vel.y):
                     if dist_y / rel_vel.y < shortest_time:
                         shortest_time = dist_y / rel_vel.y
@@ -102,7 +141,7 @@ def collide_objs_x(coll_objs: set[Square]):
     """Swap the velocities of the sorted objects, with the reverse sorted objects"""
     sorted_group: list[Square] = sorted(coll_objs, key=lambda object: object.position.x)
     velocities = []
-    
+
     # Immovable objects
     if isinstance(sorted_group[0], Immovable):
         del sorted_group[0]
@@ -112,7 +151,7 @@ def collide_objs_x(coll_objs: set[Square]):
     if isinstance(sorted_group[-1], Immovable):
         del sorted_group[-1]
         for object in sorted_group:
-            object.velocity.x *= -1 
+            object.velocity.x *= -1
 
     for object in sorted_group:
         object.colour = (0, 255, 0) # Make object green
@@ -137,7 +176,7 @@ def collide_objs_y(coll_objs: set[Square]):
     if isinstance(sorted_group[-1], Immovable):
         del sorted_group[-1]
         for object in sorted_group:
-            object.velocity.y *= -1 
+            object.velocity.y *= -1
 
     for object in sorted_group:
         object.colour = (0, 255, 0) # Make object green
@@ -145,7 +184,7 @@ def collide_objs_y(coll_objs: set[Square]):
 
     for object, velocity in zip(sorted_group, reversed(velocities)):
         object.velocity.y = velocity
-    
+
     #print("y")
 
 def update_objects(delta_time):
@@ -156,7 +195,7 @@ def update_objects(delta_time):
         shortest_time, coll_objs_x, coll_objs_y = get_coll_objs()
 
         if shortest_time < delta_time:
-            
+
             move_objects(shortest_time)
             delta_time -= shortest_time
             [collide_objs_x(group) for group in coll_objs_x]
