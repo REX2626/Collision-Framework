@@ -4,9 +4,9 @@ import random
 from time import perf_counter
 from objects import Square, Immovable
 import game
-import pygame
 from fractions import Fraction
 from vector import Vector
+import pygame
 
 from tests import multiple_at_once, three_joined, four_joined, five_joined, eleven_joined
 
@@ -153,8 +153,9 @@ def collide_objs_x(coll_objs: set[Square]):
         for object in sorted_group:
             object.velocity.x *= -1
 
+    current_time = perf_counter()
     for object in sorted_group:
-        object.colour = (0, 255, 0) # Make object green
+        object.last_collision_time = current_time
         velocities.append(object.velocity.x)
 
     for object, velocity in zip(sorted_group, reversed(velocities)):
@@ -178,8 +179,9 @@ def collide_objs_y(coll_objs: set[Square]):
         for object in sorted_group:
             object.velocity.y *= -1
 
+    current_time = perf_counter()
     for object in sorted_group:
-        object.colour = (0, 255, 0) # Make object green
+        object.last_collision_time = current_time
         velocities.append(object.velocity.y)
 
     for object, velocity in zip(sorted_group, reversed(velocities)):
@@ -188,9 +190,6 @@ def collide_objs_y(coll_objs: set[Square]):
     #print("y")
 
 def update_objects(delta_time):
-    for object in game.objects:
-        object.colour = (0, 0, 255) if isinstance(object, Immovable) else (255, 0, 0)
-
     while True:
         shortest_time, coll_objs_x, coll_objs_y = get_coll_objs()
 
@@ -224,7 +223,11 @@ def draw_objects():
     for object in game.objects:
         object.draw()
 
-def draw_window():
+font = pygame.font.SysFont("bahnschrift", 24)
+def draw_window(delta_time):
+    fps = font.render(f"FPS: {int(1/delta_time)}", True, (255, 255, 255))
+    game.WIN.blit(fps, (game.WIDTH - 100, fps.get_height()/2))
+
     pygame.display.update()
     game.WIN.fill((0, 0, 0))
 
@@ -237,7 +240,7 @@ spawn_squares(10)
 #eleven_joined()
 game.objects.add(Immovable(Vector(550, 300), Vector(0, 0), 100))
 
-delta_time = 0
+delta_time = 1
 while True:
     time1 = perf_counter()
 
@@ -249,7 +252,7 @@ while True:
 
     draw_objects()
 
-    draw_window()
+    draw_window(delta_time)
 
     time2 = perf_counter()
     delta_time = Fraction(time2 - time1)
